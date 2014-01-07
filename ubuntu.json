@@ -1,7 +1,7 @@
 {
-    "Description": "Neo4j on AWS - creates an EC2 machine, EBS volume, static IP address, and deploys the Neo4j Graph Database on it",
-
- "Mappings" : {
+  "Description": "Neo4j on AWS - creates an EC2 machine, EBS volume, static IP address, and deploys the Neo4j Graph Database on it",
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Mappings" : {
 
     "AWSRegionArch2AMI" : {
       "us-east-1"      : { "64" : "ami-0568456c" },
@@ -24,12 +24,23 @@
         "Default" : "m1.small",
         "AllowedValues" : [ "t1.micro","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge"],
         "ConstraintDescription" : "must be a valid EC2 instance type."
-        },
-        "SSHKeyName": {
-            "Description" : "Name of the SSH key that you will use to access the server (must be on AWS Availability Zone already)",
-            "Type" : "String",
-            "Default": "NEO4J"
-        }
+      },
+
+      "SSHKeyName": {
+         "Description" : "Name of the SSH key that you will use to access the server (must be on AWS Availability Zone already)",
+         "Type" : "String",
+         "Default": "NEO4J"
+      },
+
+      "NetworkWhitelist" : {
+        "Description" : " The IP address range that can be used to connect to the Neo4j server (by REST or SSH)",
+        "Type": "String",
+        "MinLength": "9",
+        "MaxLength": "18",
+        "Default": "0.0.0.0/0",
+        "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+        "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+      } 
     },
     "Resources": {
         "ElasticIP": {
@@ -98,13 +109,13 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": "0.0.0.0/0"
+                        "CidrIp": { "Ref": "NetworkWhitelist" }
                     },
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "7474",
                         "ToPort": "7474",
-                        "CidrIp": "0.0.0.0/0"
+                        "CidrIp": { "Ref": "NetworkWhitelist" }
                     }
                 ]
             }
@@ -124,10 +135,9 @@
             "Description" : "This is how you gain remote access to the machine."
         },
         "Note" :{
-            "Value" : "Your stack is probably still building.  It takes 5-10 minutes to get Neo4j and dependencies built.  Coffee time?",
-            "Description" : "Setting user expectations on timing."
+            "Value" : "It takes up to 5 minutes for your EC2 machine to finish booting and start Neo4j.  Coffee time?",
+            "Description" : ""
         }
-    },
+    }
 
-    "AWSTemplateFormatVersion": "2010-09-09"
 }
