@@ -5,13 +5,13 @@
 
     "AWSRegionArch2AMI" : {
       "us-east-1"      : { "64" : "ami-0568456c" },
-      "us-west-2"      : { "64" : "ami-30fe7300" },
-      "us-west-1"      : { "64" : "ami-1bd68a5e" },
-      "eu-west-1"      : { "64" : "ami-953b06e1" },
-      "ap-southeast-1" : { "64" : "ami-beb0caec" },
-      "ap-southeast-2" : { "64" : "ami-bd990e87" },
-      "ap-northeast-1" : { "64" : "ami-0a44f00b" },
-      "sa-east-1"      : { "64" : "ami-3c3be421" }
+      "us-west-2"      : { "64" : "ami-927613a2" },
+      "us-west-1"      : { "64" : "ami-c08dbc85" },
+      "eu-west-1"      : { "64" : "ami-66ef0111" },
+      "ap-southeast-1" : { "64" : "ami-f094c0a2" },
+      "ap-southeast-2" : { "64" : "ami-978916ad" },
+      "ap-northeast-1" : { "64" : "ami-8f78188e" },
+      "sa-east-1"      : { "64" : "ami-25b01138" }
     }
 
   },
@@ -26,15 +26,9 @@
         "ConstraintDescription" : "must be a valid EC2 instance type."
         },
         "SSHKeyName": {
-            "Description" : "Name of the SSH key that you will use to access the server (must be on AWS US-EAST already)",
+            "Description" : "Name of the SSH key that you will use to access the server (must be on AWS Availability Zone already)",
             "Type" : "String",
             "Default": "NEO4J"
-        },
-        "AwsAvailabilityZone": {
-            "Description": "Name of the AWS availability zone that you will deploy into",
-            "Type": "String",
-            "AllowedValues": { "Fn::GetAZs" : "" }
-            "Default": { "Fn::Select" : [ 0, { "Fn::GetAZs" : "" }] }
         }
     },
     "Resources": {
@@ -49,7 +43,7 @@
         "Server": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "AvailabilityZone": {"Ref": "AwsAvailabilityZone"},
+                "AvailabilityZone": { "Fn::Select" : [ 0, { "Fn::GetAZs" : "" }] },
                 "DisableApiTermination": "FALSE",
                 "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, "64"] },
                 "InstanceType": { "Ref" : "InstanceType" },
@@ -91,7 +85,7 @@
         "EBSVolume": {
             "Type": "AWS::EC2::Volume",
             "Properties": {
-                "AvailabilityZone":  {"Ref": "AwsAvailabilityZone"},
+                "AvailabilityZone": { "Fn::Select" : [ 0, { "Fn::GetAZs" : "" }] },
                 "Size": "100"
             }
         },
