@@ -53,7 +53,7 @@ Usage
 * Click the _Continue_ button
 * Fill in the 3 parameters.
     * The _SSHKeyName_ parameter is the name of your EC2 Key pair (we suggested NEO4J)
-    * The Network Whitelist allows you to control access to your database.  You can restrict it to your own IP address using the _/32_ suffix.  The default will allow connections from anywhere on the public Internet.
+    * The Network Whitelist allows you to control access to your database.  You can restrict it to your own IP address using the _/32_ suffix.  The default (0.0.0.0/0) will allow connections from anywhere on the public Internet.
     * The Instance Type lets you choose the size of machine to use.
 
 ![Parameters](images/params.jpg)
