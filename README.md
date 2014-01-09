@@ -11,4 +11,3 @@ Caveats:
 
 TODO:
 * Port documentation from the puppet thing
-* Make the EBS volume and filesystem for the Amazon Linux template
