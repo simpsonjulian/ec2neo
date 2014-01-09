@@ -10,7 +10,5 @@ Caveats:
 * Especially when it's not in neo4-contrib
 
 TODO:
-* Deploy 2.0 RPM's to yum.neo4j.org
-* Make ubuntu and amazon outputs consistent with each other
 * Port documentation from the puppet thing
 * Make the EBS volume and filesystem for the Amazon Linux template

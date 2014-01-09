@@ -1,27 +1,27 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  
-  "Description" : "**WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
-  
+
+  "Description": "Neo4j on AWS - creates an EC2 Amazon Linux machine, EBS volume, static IP address, and deploys the Neo4j Graph Database on it.  **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+
   "Parameters" : {
-      
-    "KeyName": {
+
+    "SSHKeyName": {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
       "Type": "String",
       "MinLength": "1",
       "MaxLength": "255",
       "AllowedPattern" : "[\\x20-\\x7E]*",
       "ConstraintDescription" : "can contain only ASCII characters."
-    },    
+    },
 
     "InstanceType" : {
-      "Description" : "WebServer EC2 instance type",
+      "Description" : "Server EC2 instance type",
       "Type" : "String",
       "Default" : "m1.small",
       "AllowedValues" : [ "t1.micro","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","cc1.4xlarge","cc2.8xlarge","cg1.4xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
-    "SSHLocation" : {
+    "NetworkWhiteList" : {
       "Description" : " The IP address range that can be used to SSH to the EC2 instances",
       "Type": "String",
       "MinLength": "9",
@@ -29,9 +29,9 @@
       "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
-    } 
+    }
   },
-  
+
   "Mappings" : {
     "AWSInstanceType2Arch" : {
       "t1.micro"    : { "Arch" : "64" },
@@ -62,10 +62,10 @@
       "sa-east-1"      : { "32" : "ami-3e3be423", "64" : "ami-3c3be421", "64HVM" : "NOT_YET_SUPPORTED" }
     }
   },
-    
-  "Resources" : {     
 
-    "WebServer": {  
+  "Resources" : {
+
+    "Server": {
       "Type": "AWS::EC2::Instance",
       "Metadata" : {
         "AWS::CloudFormation::Init" : {
@@ -115,10 +115,10 @@
               }
             },
             "services" : {
-              "sysvinit" : {  
+              "sysvinit" : {
                 "neo4j" : {
                   "enabled"       : "true",
-                  "ensureRunning" : "true"                
+                  "ensureRunning" : "true"
                 }
               }
             }
@@ -130,7 +130,7 @@
                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType"   : { "Ref" : "InstanceType" },
         "SecurityGroups" : [ {"Ref" : "FrontendGroup"} ],
-        "KeyName"        : { "Ref" : "KeyName" },
+        "KeyName"        : { "Ref" : "SSHKeyName" },
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
           "yum update -y aws-cfn-bootstrap\n",
@@ -143,12 +143,12 @@
           "}\n",
 
           "# Install packages\n",
-          "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" }, " -r WebServer ",
+          "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" }, " -r Server ",
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
           "# All is well so signal success\n",
           "/opt/aws/bin/cfn-signal -e 0 -r \"Neo4j setup complete\" '", { "Ref" : "WaitHandle" }, "'\n"
-        ]]}}        
+        ]]}}
       }
     },
 
@@ -158,29 +158,38 @@
 
     "WaitCondition" : {
       "Type" : "AWS::CloudFormation::WaitCondition",
-      "DependsOn" : "WebServer",
+      "DependsOn" : "Server",
       "Properties" : {
         "Handle" : {"Ref" : "WaitHandle"},
         "Timeout" : "1500"
       }
     },
-    
+
     "FrontendGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable HTTP access via port 7474 plus SSH access",
         "SecurityGroupIngress" : [
-          {"IpProtocol" : "tcp", "FromPort" : "7474", "ToPort" : "7474", "CidrIp" : {"Ref": "SSHLocation"}},
-          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}}
+          {"IpProtocol" : "tcp", "FromPort" : "7474", "ToPort" : "7474", "CidrIp" : {"Ref": "NetworkWhiteList"}},
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "NetworkWhiteList"}}
         ]
-      }      
+      }
   }
 },
-  
+
   "Outputs" : {
-    "WebsiteURL" : {
-      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":7474" ]] },
-      "Description" : "URL for newly created Neo4j install"
-    }
+     "Neo4jWebadmin" : {
+            "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "Server", "PublicIp" ]}, ":7474"]] },
+            "Description" : "This is the address of your Neo4j server web administration console."
+          },
+        "Neo4jEndPoint" : {
+            "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "Server", "PublicIp" ]}, ":7474/db/data"]] },
+            "Description" : "This is the address of your Neo4j server, that your application will use."
+          },
+        "SshAccess": {
+            "Value" : {"Fn::Join" : ["", ["ssh -i ", {"Ref": "SSHKeyName"}, ".pem -l ec2-user ", { "Fn::GetAtt" : [ "Server", "PublicIp" ]}]]},
+            "Description" : "This is how you gain remote access to the machine."
+        }
+
   }
 }

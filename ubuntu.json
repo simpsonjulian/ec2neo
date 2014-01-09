@@ -1,5 +1,5 @@
 {
-  "Description": "Neo4j on AWS - creates an EC2 machine, EBS volume, static IP address, and deploys the Neo4j Graph Database on it",
+  "Description": "Neo4j on AWS - creates an EC2 Ubuntu machine, EBS volume, static IP address, and deploys the Neo4j Graph Database on it.  **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
   "AWSTemplateFormatVersion": "2010-09-09",
   "Mappings" : {
 
@@ -28,8 +28,7 @@
 
       "SSHKeyName": {
          "Description" : "Name of the SSH key that you will use to access the server (must be on AWS Availability Zone already)",
-         "Type" : "String",
-         "Default": "NEO4J"
+         "Type" : "String"
       },
 
       "NetworkWhitelist" : {
@@ -135,7 +134,7 @@
             "Description" : "This is how you gain remote access to the machine."
         },
         "Note" :{
-            "Value" : "It takes up to 5 minutes for your EC2 machine to finish booting and start Neo4j.  Coffee time?",
+            "Value" : "It takes a few minutes for your EC2 machine to finish booting and start Neo4j.  Coffee time?",
             "Description" : ""
         }
     }
