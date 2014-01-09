@@ -6,8 +6,9 @@ About
 
 This template creates a complete Neo4j installation, including [Amazon AWS](http://aws.amazon.com/) server, fixed IP
 address and backup storage.  It's intended to help application developers get up and running quickly with Neo4j,
-without in-depth experience of Linux servers, AWS, or installing databases like Neo4j.  It runs in all current (January 2014)
-Amazon Regions.
+without in-depth experience of Linux servers, AWS, or installing databases like Neo4j.
+
+It runs in all current (January 2014) Amazon Regions. It uses Amazon Security Groups to optionally secure the database.
 
 Cost
 ----
@@ -31,6 +32,7 @@ To use this tool you'll need:
 * An AWS account, with credentials, and credit card on file
 * An [EC2 key pair](https://github.com/neo4j-contrib/neo4j-puppet/blob/master/README.EC2_KEY.md), in the US-EAST zone (which is the default)
 * A browser
+* If you want to restrict access to the database, you'll want to know your IP address.  You can [Google that](https://www.google.com/search?q=what+is+my+ip+address&oq=what+is+my+ip+address).
 
 Choosing an OS
 --------------
@@ -51,8 +53,10 @@ Usage
 * Click the _Continue_ button
 * Fill in the 3 parameters.
     * The _SSHKeyName_ parameter is the name of your EC2 Key pair (we suggested NEO4J)
-    * The Network Whitelist allows you to control access to your database.  You can restrict it to your own IP address with the /32 suffix.
+    * The Network Whitelist allows you to control access to your database.  You can restrict it to your own IP address using the _/32_ suffix.  The default will allow connections from anywhere on the public Internet.
     * The Instance Type lets you choose the size of machine to use.
+
+![Parameters](images/params.jpg)
 
 * Click _Continue_ button
 * You can optionally add tags to help identify your stacks.  Click _Continue_ button.
