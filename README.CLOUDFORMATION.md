@@ -84,7 +84,7 @@ Troubleshooting
 *Why might this go wrong?*
 
 * Resources are sometimes not available at Amazon.  That's just part of our brave new cloudy world.  Right now the templates will attempt to use the first availability zone in the region.
-* It's hard to legally and reliably get the Oracle JVM onto the system. So we're using OpenJDK.
+* It's hard to legally and reliably get the Oracle JVM onto the system. So we're using OpenJDK.  This should not cause issues, but Neo4j may complain on start.  You can safely ignore that message.
 * Sometimes, something will happen that we cannot predict.  We'd appreciate your help here; a [GitHub issue](/../../issues) or email to the Mailing List with some [smart questions](http://www.catb.org/esr/faqs/smart-questions.html#uselists) or observations.
 
 *How to see detail:*
